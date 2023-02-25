@@ -146,6 +146,7 @@ def can_be_compared(logger, base, target):
     run with different tests sets or parameters. Return true if tests can be
     compared
     """
+    ret = True
     base_configuration = base['configuration']
     target_configuration = target['configuration']
 
@@ -165,7 +166,10 @@ def can_be_compared(logger, base, target):
             logger.debug(f"Enriching {target_configuration['STARTTIME']} with {guess}")
             target_configuration['OESELFTEST_METADATA'] = guess
 
-    return metadata_matches(base_configuration, target_configuration) \
+    if base_configuration.get('TEST_TYPE') == 'runtime' and any(result.startswith("ltpresult") for result in base['result']):
+        ret = target_configuration.get('TEST_TYPE') == 'runtime' and any(result.startswith("ltpresult") for result in target['result'])
+
+    return ret and metadata_matches(base_configuration, target_configuration) \
         and machine_matches(base_configuration, target_configuration)
 
 
